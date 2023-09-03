@@ -11,3 +11,4 @@ training/wav2vec2-large-bengali-asr
 training/kaggle.json
 out.arpa
 out.trie.klm
+text.txt
