@@ -437,7 +437,7 @@ def main():
                                            vocab_size=len(processor.tokenizer))
 
     model.config.ctc_zero_infinity = True
-    model.ctc_loss_reduction = "mean"
+    model.config.ctc_loss_reduction = "mean"
 
 
     train_ds = BengaliDataset(train,processor)
