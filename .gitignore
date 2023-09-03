@@ -1,0 +1,13 @@
+.ipynb_checkpoints
+kenlm
+training/__pycache__
+training/checkpoint-mms
+training/mms
+training/mms-1b-all
+training/mms-1b
+training/wandb
+training/wav2vec2
+training/wav2vec2-large-bengali-asr
+training/kaggle.json
+out.arpa
+out.trie.klm
