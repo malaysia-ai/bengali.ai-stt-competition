@@ -1,0 +1,15 @@
+~/.local/bin/deepspeed wav2vec2-finetune.py \
+--deepspeed ds_config_zero3.json \
+--model_name_or_path="facebook/wav2vec2-large-xlsr-53" \
+--output_dir="wav2vec2" \
+--num_train_epochs="1" \
+--per_device_train_batch_size="16" \
+--learning_rate="2e-5" \
+--evaluation_strategy="steps" \
+--save_steps="400" \
+--eval_steps="400" \
+--logging_steps="50" \
+--layerdrop="0.0" \
+--save_total_limit="2" \
+--gradient_checkpointing \
+--do_train
