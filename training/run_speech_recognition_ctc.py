@@ -384,20 +384,17 @@ def main():
 
     eval_metrics = {metric: evaluate.load(metric) for metric in data_args.eval_metrics}
 
-    processor = AutoProcessor.from_pretrained(model_args.model_name_or_path)
-    model = Wav2Vec2ForCTC.from_pretrained(model_args.model_name_or_path)
+    # processor.tokenizer.set_target_lang("ben")
 
-    model.config.ctc_zero_infinity = True
+    # with open('vocab.json', 'w') as fopen:
+    #     json.dump(processor.tokenizer.vocab['ben'], fopen)
 
-    processor.tokenizer.set_target_lang("ben")
 
-    with open('vocab.json', 'w') as fopen:
-        json.dump(processor.tokenizer.vocab['ben'], fopen)
 
     tokenizer = Wav2Vec2CTCTokenizer(
-        "vocab.json", 
-        unk_token="<unk>",
-        pad_token="<pad>",
+        "/home/ubuntu/bengali/speech-to-text/training/vocab_folder/vocab.json", 
+        unk_token="[UNK]",
+        pad_token="[PAD]",
         word_delimiter_token="|"
     )
 
@@ -406,8 +403,21 @@ def main():
         sampling_rate=16000, 
         padding_value=0.0, 
         do_normalize=True, 
-        return_attention_mask=False
+        return_attention_mask=True
     )
+
+    processor = Wav2Vec2Processor(tokenizer = tokenizer, feature_extractor = feature_extractor)
+
+    print(processor.tokenizer.pad_token_id)
+
+    model = Wav2Vec2ForCTC.from_pretrained(model_args.model_name_or_path,
+                                            pad_token_id=processor.tokenizer.pad_token_id,
+                                            vocab_size=len(processor.tokenizer),
+                                            ignore_mismatched_sizes=True)
+    
+    model.config.ctc_zero_infinity = True
+    
+
 
     train_ds = BengaliDataset(train,processor)
     valid_ds = BengaliDataset(val,processor)
@@ -470,3 +480,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

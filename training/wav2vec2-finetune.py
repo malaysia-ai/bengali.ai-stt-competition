@@ -56,6 +56,8 @@ from transformers.trainer_utils import get_last_checkpoint, is_main_process
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
+from sklearn.model_selection import train_test_split
+
 import wandb
 
 
@@ -346,12 +348,12 @@ def save_vocab(dataframe):
     """
     vocab = construct_vocab(dataframe['sentence'].tolist())
     vocab_dict = {v: k for k, v in enumerate(vocab)}
-    vocab_dict["__"] = vocab_dict[" "]
+    vocab_dict["|"] = vocab_dict[" "]
     _ = vocab_dict.pop(" ")
     vocab_dict["[UNK]"] = len(vocab_dict)
     vocab_dict["[PAD]"] = len(vocab_dict)
 
-    with open('/home/ubuntu/bengali/aisyah/training/vocab_folder/vocab.json', 'w') as fopen:
+    with open('/home/ubuntu/bengali/speech-to-text/training/vocab_folder/vocab.json', 'w') as fopen:
         json.dump(vocab_dict, fopen)
 
 def construct_vocab(texts):
@@ -401,31 +403,57 @@ def main():
     logger.setLevel(logging.INFO if is_main_process(training_args.local_rank) else logging.WARN)
 
     # 1. load the dataset
-    df_ = pd.read_parquet("/home/ubuntu/bengali/data/train_duration.parquet")
+    df = pd.read_parquet("/home/ubuntu/bengali/data/train_duration.parquet")
+    # df = pd.read_parquet("/home/ubuntu/Raijin/LATEST_DATA_WAV2VEC2.parquet")
 
-    df_['sentence'] = df_['sentence'].apply(lambda x: remove_special_characters(x))
+    # df['sentence'] = df['sentence'].apply(lambda x: remove_special_characters(x))
 
-    save_vocab(df_)
+    # save_vocab(df_)
 
-    df = df_[(df_['durs'] > 0) & (df_['durs'] <= 15)]
+    # df = df[(df['durs'] > 0) & (df['durs'] <= 18)]
 
-    train = df[df['split'] == 'train'].reset_index(drop=True)
-    val = df[df['split'] == 'valid'].sample(frac=.2, random_state=5).reset_index(drop=True)
+    data_0 = df.loc[df['split']=='valid'].reset_index(drop=True)
+    valid_0 = data_0.sample(frac=0.1, random_state=42)
+    train_0 = data_0[~data_0.index.isin(valid_0.index)]
+
+    data_1 = df.loc[df['split']=='train'].reset_index(drop=True).sample(frac=0.05, random_state=42)
+    valid_1 = data_1.sample(frac=0.08, random_state=42)
+    train_1 = data_1[~data_1.index.isin(valid_1.index)]
+
+    train = pd.concat([train_0, train_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
+    val = pd.concat([valid_0, valid_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
+
+    # df = df[df['check_len'] == 'valid']
+
+    # train = df[df['split'] == 'train'].reset_index(drop=True)
+    # val = df[df['split'] == 'valid'].sample(frac=.2, random_state=5).reset_index(drop=True)
+    # val = df[df['split'] == 'valid'].reset_index(drop=True)
+    # train, val = train_test_split(df, test_size=0.02, random_state=42)
+    
+    # train = train.reset_index(drop=True)
+    # val = val.reset_index(drop=True)
+
     print(f"Training on samples: {len(train)}, Validation on samples: {len(val)}")
-
     eval_metrics = {metric: evaluate.load(metric) for metric in data_args.eval_metrics}
 
 
+    # tokenizer = Wav2Vec2CTCTokenizer(
+    #     "/home/ubuntu/bengali/speech-to-text/training/vocab_folder/vocab-new.json", 
+    #     unk_token="<unk>",
+    #     pad_token="<pad>",
+    #     word_delimiter_token="|"
+    # )
+
     tokenizer = Wav2Vec2CTCTokenizer(
-        "/home/ubuntu/bengali/aisyah/training/vocab_folder/vocab.json", 
-        unk_token="[UNK]",
-        pad_token="[PAD]",
-        word_delimiter_token="__"
+        "/home/ubuntu/Raijin/full_vocab.json", 
+        unk_token="<unk>",
+        pad_token="<pad>",
+        word_delimiter_token="|"
     )
 
     feature_extractor = Wav2Vec2FeatureExtractor(
         feature_size=1, 
-        sampling_rate=16000, 
+        sampling_rate=16_000, 
         padding_value=0.0, 
         do_normalize=True, 
         return_attention_mask=False
@@ -438,6 +466,11 @@ def main():
 
     model.config.ctc_zero_infinity = True
     model.config.ctc_loss_reduction = "mean"
+    model.config.mask_time_prob= model_args.mask_time_prob
+    model.config.mask_feature_prob=model_args.mask_feature_prob
+    model.config.mask_time_length= model_args.mask_time_length
+    model.config.mask_feature_length=model_args.mask_feature_length
+
 
 
     train_ds = BengaliDataset(train,processor)
@@ -453,6 +486,7 @@ def main():
         pred.label_ids[pred.label_ids == -100] = tokenizer.pad_token_id
 
         pred_str = tokenizer.batch_decode(pred_ids)
+        
         # we do not want to group tokens when computing the metrics
         label_str = tokenizer.batch_decode(pred.label_ids, group_tokens=False)
 
