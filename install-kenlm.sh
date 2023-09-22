@@ -2,5 +2,5 @@ sudo apt install build-essential libboost-system-dev libboost-thread-dev libboos
 wget -O - https://kheafield.com/code/kenlm.tar.gz | tar xz
 mkdir kenlm/build
 cd kenlm/build
-cmake ..
+~/.local/bin/cmake ..
 make -j2

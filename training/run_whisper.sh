@@ -1,0 +1,21 @@
+python3 run_speech_recognition_seq2seq.py \
+    --model_name_or_path="openai/whisper-small" \
+    --dataset_config_name="bn" \
+    --language="bengali" \
+    --output_dir="./whisper-small-trial-0" \
+    --per_device_train_batch_size="10" \
+    --per_device_eval_batch_size="10" \
+    --logging_steps="25" \
+    --learning_rate="2e-5" \
+    --evaluation_strategy="steps" \
+    --eval_steps="1000" \
+    --save_strategy="steps" \
+    --save_steps="200" \
+    --generation_max_length="225" \
+    --freeze_feature_encoder="False" \
+    --gradient_checkpointing \
+    --fp16 \
+    --do_train \
+    --predict_with_generate \
+    --num_train_epochs 5 \
+    --save_total_limit="3" \
