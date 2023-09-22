@@ -7,7 +7,10 @@ training/mms-1b-all
 training/mms-1b
 training/wandb
 training/wav2vec2
-training/wav2vec2-large-bengali-asr
+training/wav2vec2-bengali-xlsr-val+train
+training/wav2vec2-bengali-xlsr
+training/whisper-small-trial-0
+training/whisper
 training/kaggle.json
 out.arpa
 out.trie.klm
