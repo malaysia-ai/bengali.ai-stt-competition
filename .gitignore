@@ -14,4 +14,5 @@ training/whisper
 training/kaggle.json
 out.arpa
 out.trie.klm
-text.txt
+*.txt
+kenlm-deprecated-text.txt
