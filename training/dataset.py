@@ -22,7 +22,7 @@ class BengaliDataset(torch.utils.data.Dataset):
         
         inputs = self.processor(
             audio_array,
-            sampling_rate=16000,
+            sampling_rate=16_000,
             return_tensors='pt'  
         )
         
@@ -35,7 +35,39 @@ class BengaliDataset(torch.utils.data.Dataset):
         return len(self.df)
 
     def read_audio(self, mp3_path):
-        target_sr = 16000  # Set the target sampling rate
+        target_sr = 16_000  # Set the target sampling rate
+        
+        audio, sr = librosa.load(mp3_path, sr=None)  # Load with original sampling rate
+        audio_array = librosa.resample(audio, orig_sr=sr, target_sr=target_sr)
+        
+        return audio_array
+
+class BengaliWDataset(torch.utils.data.Dataset):
+    def __init__(self, df, feature_extractor,tokenizer):
+        self.df = df
+        self.feature_extractor = feature_extractor
+        self.tokenizer = tokenizer
+
+
+    def __getitem__(self, idx):
+        audio_path = self.df.loc[idx]['path']
+        audio_array = self.read_audio(audio_path)
+        
+        inputs = self.feature_extractor(
+            audio_array,
+            sampling_rate=16_000,
+            return_tensors='pt'  
+        )
+        
+        labels = self.tokenizer(self.df.loc[idx]['sentence']).input_ids
+        
+        return {'input_features': inputs['input_features'][0], 'labels': labels}
+        
+    def __len__(self):
+        return len(self.df)
+
+    def read_audio(self, mp3_path):
+        target_sr = 16_000  # Set the target sampling rate
         
         audio, sr = librosa.load(mp3_path, sr=None)  # Load with original sampling rate
         audio_array = librosa.resample(audio, orig_sr=sr, target_sr=target_sr)
