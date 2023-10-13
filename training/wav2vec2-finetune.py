@@ -413,11 +413,14 @@ def main():
     # df = df[(df['durs'] > 0) & (df['durs'] <= 18)]
 
     data_0 = df.loc[df['split']=='valid'].reset_index(drop=True)
-    valid_0 = data_0.sample(frac=0.1, random_state=42)
+    valid_0 = data_0.sample(frac=0.04, random_state=42)
+    # valid_0 = data_0.sample(frac=0.2, random_state=42)
     train_0 = data_0[~data_0.index.isin(valid_0.index)]
 
-    data_1 = df.loc[df['split']=='train'].reset_index(drop=True).sample(frac=0.05, random_state=42)
-    valid_1 = data_1.sample(frac=0.08, random_state=42)
+    # data_1 = df.loc[df['split']=='train'].reset_index(drop=True).sample(frac=0.4, random_state=42)
+    data_1 = df.loc[df['split']=='train'].reset_index(drop=True).sample(frac=0.8, random_state=42)
+    valid_1 = data_1.sample(frac=0.04, random_state=42)
+    # valid_1 = data_1.sample(frac=0.1, random_state=42)
     train_1 = data_1[~data_1.index.isin(valid_1.index)]
 
     train = pd.concat([train_0, train_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
@@ -445,7 +448,7 @@ def main():
     # )
 
     tokenizer = Wav2Vec2CTCTokenizer(
-        "/home/ubuntu/Raijin/full_vocab.json", 
+        "/home/ubuntu/bengali/speech-to-text/training/vocab_folder/vocab-new.json", 
         unk_token="<unk>",
         pad_token="<pad>",
         word_delimiter_token="|"
@@ -459,10 +462,9 @@ def main():
         return_attention_mask=False
     )
 
+
     processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tokenizer)
-    model = Wav2Vec2ForCTC.from_pretrained(model_args.model_name_or_path,
-                                           pad_token_id=processor.tokenizer.pad_token_id,
-                                           vocab_size=len(processor.tokenizer))
+    model = Wav2Vec2ForCTC.from_pretrained(model_args.model_name_or_path,pad_token_id=processor.tokenizer.pad_token_id,ignore_mismatched_sizes=True,vocab_size=len(processor.tokenizer))
 
     model.config.ctc_zero_infinity = True
     model.config.ctc_loss_reduction = "mean"
@@ -470,8 +472,6 @@ def main():
     model.config.mask_feature_prob=model_args.mask_feature_prob
     model.config.mask_time_length= model_args.mask_time_length
     model.config.mask_feature_length=model_args.mask_feature_length
-
-
 
     train_ds = BengaliDataset(train,processor)
     valid_ds = BengaliDataset(val,processor)
@@ -494,8 +494,6 @@ def main():
 
         return metrics
 
-
-    # Instantiate custom data collator
     data_collator = DataCollatorCTCWithPadding(processor=processor)
 
     # Initialize Trainer
