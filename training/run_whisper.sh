@@ -10,12 +10,12 @@ python3 run_speech_recognition_seq2seq.py \
     --evaluation_strategy="steps" \
     --eval_steps="1000" \
     --save_strategy="steps" \
-    --save_steps="200" \
-    --generation_max_length="225" \
+    --save_steps="1000" \
     --freeze_feature_encoder="False" \
     --gradient_checkpointing \
     --fp16 \
     --do_train \
-    --predict_with_generate \
     --num_train_epochs 5 \
     --save_total_limit="3" \
+    --max_step="70000" \
+    --predict_with_generate

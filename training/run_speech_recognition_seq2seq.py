@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+e#!/usr/bin/env python
 # coding=utf-8
 # Copyright 2021 The HuggingFace Team. All rights reserved.
 #
@@ -45,7 +45,7 @@ from transformers import (
     Seq2SeqTrainingArguments,
     set_seed,
 )
-from transformers import WhisperFeatureExtractor, WhisperTokenizer, WhisperProcessor, WhisperForConditionalGeneration
+from transformers import WhisperFeatureExtractor, WhisperTokenizer, WhisperProcessor, WhisperForConditionalGeneration, WhisperConfig
 from transformers.trainer_utils import get_last_checkpoint, is_main_process
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
@@ -322,13 +322,14 @@ def main():
     # 1. load the dataset
     df = pd.read_parquet("/home/ubuntu/bengali/data/LATEST_DATA_WAV2VEC2_DURATION.parquet")
 
-    df = df[(df['durs'] > 0) & (df['durs'] <= 18)]
+    df = df[(df['durs'] > 0) & (df['durs'] <= 16)]
 
     # df = df[df['check_len'] == 'valid']
 
-    train, val = train_test_split(df, test_size=0.002, random_state=42)
+    train, val = train_test_split(df, test_size=0.005, random_state=42)
     
-    train = train.sample(frac=0.06, random_state=42).reset_index(drop=True)
+    # train = train.sample(frac=0.2, random_state=42).reset_index(drop=True)
+    train = train.sample(frac=0.5, random_state=42).reset_index(drop=True)
     val = val.reset_index(drop=True)
 
     # train = df[df['split'] == 'train'].reset_index(drop=True)
@@ -352,10 +353,18 @@ def main():
     tokenizer = WhisperTokenizer.from_pretrained(
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path
     )
+
+    #CUBA
+    # model_config = WhisperConfig.from_pretrained(model_args.model_name_or_path)
+    # model_config.max_length = 512
+
+
     model = WhisperForConditionalGeneration.from_pretrained(
         model_args.model_name_or_path,
     )
 
+    # model.config.max_length = 512
+    # model.generation_config.max_length = 512
 
 
     if model.config.decoder_start_token_id is None:
@@ -440,9 +449,9 @@ def main():
         max_train_samples = (
             data_args.max_train_samples
             if data_args.max_train_samples is not None
-            else len(vectorized_datasets["train"])
+            else len(train)
         )
-        metrics["train_samples"] = min(max_train_samples, len(vectorized_datasets["train"]))
+        metrics["train_samples"] = min(max_train_samples, len(train))
         trainer.log_metrics("train", metrics)
         trainer.save_metrics("train", metrics)
         trainer.save_state()

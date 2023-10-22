@@ -18,6 +18,8 @@ from transformers.trainer_utils import get_last_checkpoint
 from malaya_speech.torch_model import conformer
 from malaya_speech.utils import torch_featurization
 
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 class ConformerRNNTModule(nn.Module):
     def __init__(self, model, sp_model):
@@ -105,13 +107,10 @@ class BengaliDataset(torch.utils.data.Dataset):
 @dataclass
 class ScriptArguments:
 
-    train_dataset: str
-    val_dataset: str
     model: str = field(default='conformer_rnnt_base')
-    sp_model: str = field(default='./bengali-stats.model')
+    sp_model: str = field(default='./spm-bengali.model')
     stats_file: str = field(default='./bengali-stats.json')
     worker_size: int = field(default=5)
-
 
 def main():
 
@@ -186,7 +185,7 @@ def main():
         eval_dataset=val_dataset,
         data_collator=batch,
         compute_metrics=None,
-        preprocess_logits_for_metrics=None,
+        preprocess_logits_for_metrics=None
     )
 
     last_checkpoint = get_last_checkpoint(training_args.output_dir)

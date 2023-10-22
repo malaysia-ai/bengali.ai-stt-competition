@@ -14,20 +14,22 @@
 # --gradient_checkpointing \
 # --do_train
 
-python3 wav2vec2-finetune.py \
---model_name_or_path="facebook/wav2vec2-large-xlsr-53" \
---output_dir="./wav2vec2-bengali-xlsr-val+train" \
---num_train_epochs="20" \
+~/.local/bin/deepspeed wav2vec2-finetune.py \
+--model_name_or_path="ai4bharat/indicwav2vec_v1_bengali" \
+--deepspeed ds_config_zero3.json \
+--output_dir="./wav2vec2-bengali-xlsr-indi" \
+--num_train_epochs="10" \
 --per_device_train_batch_size="5" \
---learning_rate="2e-5" \
+--learning_rate="5e-5" \
 --evaluation_strategy="steps" \
---save_steps="400" \
---eval_steps="2000" \
+--save_steps="1000" \
+--eval_steps="1000" \
 --logging_steps="50" \
 --layerdrop="0.0" \
 --save_total_limit="2" \
 --gradient_checkpointing \
 --do_train
+
 
 # python3 wav2vec2-finetune.py \
 # --model_name_or_path="facebook/wav2vec2-large-xlsr-53" \
