@@ -77,12 +77,6 @@ model.save_pretrained('./mms-1b-all')
 
 ```
 
-## Wav2vec2 with KenLM
-
-1. Install KenLM `install-kenlm.sh`
-2. Refer notebook kenlm.ipynb for forming kenlm language model for wav2vec2 model
-
-
 ## Create folds from dataset
 We experimented with training models with different folds of data. Refer `create-fold.ipynb` for code on creating folds out of our dataset.
 
@@ -101,7 +95,7 @@ This section outlines the key steps that led to our placement in top 8% in the B
 Dataset normalization using bnmnormalizer significantly improved performance. Cleaned data  outperformed unnormalized and preprocessed data.
 
 ### Model Selection
-IndicWav2Vec: The indicwav2vec model from ai4bharat was the most powerful model used in the competition.
+ASR Model: The indicwav2vec model from ai4bharat was the most powerful model used in the competition.
 
 Language Model: A 3-gram Language Model built with KenLM using the competition dataset text. 3-grams performed better than 4-grams and 5-grams.
 
