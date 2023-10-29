@@ -1,4 +1,4 @@
-# KenLM Language Model
+# KenLM
 
 ## Training Summary
 
