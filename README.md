@@ -80,7 +80,7 @@ model.save_pretrained('./mms-1b-all')
 ## Create folds from dataset
 We experimented with training models with different folds of data. Refer `create-fold.ipynb` for code on creating folds out of our dataset.
 
-### Dataset Cleaning
+## Dataset Cleaning
 We conducted data cleaning on the audio transcription by:
 
 - Removing all kinds of punctuation. Manually added quotations into the list.
