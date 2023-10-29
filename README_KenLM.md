@@ -1,6 +1,6 @@
-## KenLM
+# KenLM
 
-# KenLM Summary
+### Training Summary
 
 KenLM is a fast language model and accurate. We use n-gram LM to enhance our speech recognition system, in this case KenLM. 
 
