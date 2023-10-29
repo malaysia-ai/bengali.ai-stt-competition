@@ -85,6 +85,16 @@ We experimented with training models with different folds of data. Refer `create
 - Install KenLM as mentioned in install-kenlm.sh.
 - Refer to the notebook kenlm.ipynb for creating a KenLM language model for the wav2vec2 model.
 
+Overview
+KenLM is a fast language model and accurate. We use n-gram LM to enhance asr model.
+
+Summary:
+In this notebook, we train the models with the texts from competition datasets (train and validation) and google fleurs bengali.
+
+We attached KenLM language model into our wav2vec model to improve our model score and use Word Error Rate (WER) and Character Error Rate (CER) as our evaluation metrics benchmark the predictions.
+
+After rigorous evaluations, 3-gram showed the best performance among 4-gram and 5-gram models.
+
 ## Inference
 To perform inference with the fine-tuned model, refer to the notebook inference.ipynb for loading the model checkpoint and conducting inference.
 
